@@ -7,7 +7,7 @@
     "url": "git://github.com/tusbar/grunt-subgrunt.git"
   },
   "scripts": {
-    "test": "grunt test"
+    "test": "grunt jshint"
   },
   "keywords": [
     "gruntplugin",
@@ -19,6 +19,11 @@
     "name": "Bertrand Marron",
     "email": "b@pk.am",
     "url": "http://pk.am"
+  },
+  "contributors": {
+    "name": "Jean-cédric Thérond",
+    "email": "jean-cedric.therond@cellfishmedia.fr",
+    "url": "kane-thornwyrd.github.io"
   },
   "license": "MIT",
   "bugs": {
