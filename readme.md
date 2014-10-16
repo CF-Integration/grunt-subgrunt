@@ -1,10 +1,10 @@
 # grunt-subgrunt
 
-[![Build Status](https://secure.travis-ci.org/tusbar/grunt-subgrunt.svg?branch=master)](https://travis-ci.org/tusbar/grunt-subgrunt)
-[![Dependencies Status](https://david-dm.org/tusbar/grunt-subgrunt.svg)](https://david-dm.org/tusbar/grunt-subgrunt)
-[![Dev Dependencies Status](https://david-dm.org/tusbar/grunt-subgrunt/dev-status.svg)](https://david-dm.org/tusbar/grunt-subgrunt#info=devDependencies)
+[![Build Status](https://secure.travis-ci.org/kane-thornwyrd/grunt-subgrunt.svg?branch=master)](https://travis-ci.org/tusbar/grunt-subgrunt)
+[![Dependencies Status](https://david-dm.org/kane-thornwyrd/grunt-subgrunt.svg)](https://david-dm.org/tusbar/grunt-subgrunt)
+[![Dev Dependencies Status](https://david-dm.org/kane-thornwyrd/grunt-subgrunt/dev-status.svg)](https://david-dm.org/tusbar/grunt-subgrunt#info=devDependencies)
 
-> Run sub-projects' grunt tasks.  
+> Run sub-projects' grunt tasks.
 > This plugin was inspired by https://gist.github.com/cowboy/3819170.
 
 ## Getting started
@@ -52,32 +52,32 @@ grunt.initConfig({
 ### Options
 
 #### options.npmInstall
-Type: `bool`  
+Type: `bool`
 Default value: `true`
 
 Determines wether `npm install` will be ran for the sub-project (thus installing dev dependencies).
 
 #### options.npmClean
-Type: `bool`  
-Default value: `false`  
+Type: `bool`
+Default value: `false`
 *Requires npm >= 1.3.10*
 
 When enabled, runs `npm prune --production` to clean development dependencies.
 
 #### options.npmPath
-Type: `string`  
+Type: `string`
 Default value: `'npm'`
 
 The location of the `npm` executable. Defaults to `'npm'` as it should be available in the `$PATH` environment variable.
 
 #### options.passGruntFlags
-Type: `bool`  
-Default value: `true`  
+Type: `bool`
+Default value: `true`
 
 When enabled, passes the grunt.options thru to the subgrunt task.
 
 #### options.limit
-Type: `Number`  
+Type: `Number`
 Default value: Number of CPU cores (`require('os').cpus().length`) with a minimum of 2
 
 Limit how many sub-grunt projects are launched concurrently.
