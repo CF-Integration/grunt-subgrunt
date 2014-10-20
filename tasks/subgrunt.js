@@ -1,28 +1,79 @@
 'use strict';
 
-var async = require('async');
-var glob = require('glob');
+var
+    async = require('async'),
+    glob = require('glob'),
+    _ = require('underscore'),
+    q = require("kew")
+;
 
 module.exports = function (grunt) {
 
-    var runNpmInstall = function (path, options, next) {
+
+    var determineSuccess = function(command, args){
+        var deferred = q.defer();
+        return function(status){
+            var _command = command + ' ' + args.join(' ');
+            if (status.err || status.code > 0) {
+                status.command = _command;
+                // grunt.fail.warn('Failed running "' + _command + '" in "' + status.path + '".');
+                deferred.reject(status);
+            } else {
+                // grunt.log.ok('Ran "' + _command + '" in "' + status.path + '".');
+                deferred.resolve(command, args);
+            }
+            return deferred;
+        };
+    };
+
+    var outputReport = function(type){
+        switch(type){
+            case 'fail':
+            return function(datas){
+                grunt.fail.warn('Failed running "' + datas.cmd + ' ' + datas.args.join(' ') + '" in "' + datas.path + '".');
+            }
+            break;
+            case 'success':
+            default:
+            return function(datas){
+                grunt.log.ok('Ran "' + datas.cmd + ' ' + datas.args.join(' ') + '" in "' + datas.path + '".');
+            }
+            break;
+        }
+    };
+
+    var runNpmInstall = function (path, options) {
+        var deferred = q.defer();
         grunt.util.spawn({
             cmd: options.npmPath,
             args: [ 'install' ],
             opts: { cwd: path, stdio: 'inherit' }
         }, function (err, result, code) {
-            if (err || code > 0) {
-                grunt.fail.warn('Failed installing node modules in "' + path + '".');
-            }
-            else {
-                grunt.log.ok('Installed node modules in "' + path + '".');
-            }
-
-            next();
+            var _resolv = determineSuccess(options.npmPath, 'install')({
+                'err' : err,
+                'result' : result,
+                'code' : code,
+                'path' : path
+            });
+            var infos = {
+                'cmd'       : options.command,
+                'args'      : options.args,
+                'err'       : err,
+                'result'    : result,
+                'code'      : code,
+                'path'      : path
+            };
+            _resolv.then(function(status){ return deferred.resolve(infos); });
+            _resolv.fail(function(status){ return deferred.reject(infos); });
+            return _resolv;
         });
+
+        return deferred;
     };
 
-    var runNpmClean = function (path, options, next) {
+    var runNpmClean = function (path, options) {
+        var deferred = q.defer();
+
         // Requires npm >= 1.3.10!
 
         grunt.util.spawn({
@@ -30,40 +81,90 @@ module.exports = function (grunt) {
             args: [ 'prune', '--production' ],
             opts: { cwd: path, stdio: 'inherit' }
         }, function (err, result, code) {
-            if (err || code > 0) {
-                grunt.fail.warn('Failed cleaning development dependencies in "' + path + '".');
-            }
-            else {
-                grunt.log.ok('Cleaned development dependencies in "' + path + '".');
-            }
-
-            next();
+            var _resolv = determineSuccess(options.npmPath, 'prune --production')({
+                'err' : err,
+                'result' : result,
+                'code' : code,
+                'path' : path
+            })
+            var infos = {
+                'cmd'       : options.command,
+                'args'      : options.args,
+                'err'       : err,
+                'result'    : result,
+                'code'      : code,
+                'path'      : path
+            };
+            _resolv.then(function(status){ return deferred.resolve(infos); });
+            _resolv.fail(function(status){ return deferred.reject(infos); });
+            return _resolv;
         });
+
+        return deferred;
     };
 
-    var runGruntTasks = function (path, tasks, options, next) {
-        var args = options.passGruntFlags ? grunt.option.flags().concat(tasks) : tasks;
+    var runCommand = function (path, options){
+        var deferred = q.defer();
+
+        options.path =  path;
+
+        grunt.util.spawn({
+            cmd: options.command,
+            args: options.args,
+            opts: { cwd: path, stdio: 'inherit' }
+        }, function (err, result, code) {
+            var _resolv = determineSuccess(options.command, options.args)({
+                'err' : err,
+                'result' : result,
+                'code' : code,
+                'path' : path
+            });
+            var infos = {
+                'cmd'       : options.command,
+                'args'      : options.args,
+                'err'       : err,
+                'result'    : result,
+                'code'      : code,
+                'path'      : path
+            };
+            _resolv.then(function(status){ return deferred.resolve(infos); });
+            _resolv.fail(function(status){ return deferred.reject(infos); });
+            return _resolv;
+        });
+
+        return deferred;
+    };
+
+    var runGruntTasks = function (path, options) {
+        console.log('RUNGRUNTTASKS', path, options);
+        var deferred = q.defer();
+        var args = options.passGruntFlags ? grunt.option.flags().concat(options.tasks) : options.tasks;
 
         grunt.util.spawn({
             grunt: true,
             args: args,
             opts: { cwd: path, stdio: 'inherit' }
         }, function (err, result, code) {
-            if (err || code > 0) {
-                grunt.fail.warn('Failed running "grunt ' + args.join(' ') + '" in "' + path + '".');
-            }
-            else {
-                grunt.log.ok('Ran "grunt ' + args.join(' ') + '" in "' + path + '".');
-            }
-
-            next();
+            return determineSuccess('grunt ' + args.join(' '))({
+                'err' : err,
+                'result' : result,
+                'code' : code,
+                'path' : path
+            })
+            .then(function(){ return deferred.resolve(path, options); })
+            .fail(function(status){ return deferred.reject(status); })
+            ;
         });
+
+        return deferred;
     };
+
+
 
     grunt.registerMultiTask('subgrunt', 'Run sub-projects\' grunt tasks.', function () {
         var cb = this.async();
         var options = this.options({
-            npmInstall: true,
+            npmInstall: false,
             npmClean: false,
             npmPath: 'npm',
             passGruntFlags: true,
@@ -95,15 +196,47 @@ module.exports = function (grunt) {
                     return next();
                 }
 
-                if (options.npmInstall) {
-                    runNpmInstall(path, options, function () {
-                        runGruntTasks(path, tasks, options, options.npmClean ? function () {
-                            runNpmClean(path, options, next);
-                        } : next);
+                options.tasks = tasks;
+
+                if(_.size(options.commands) > 0) {
+                    var _promises = [];
+                    _(options.commands).each( function(args, command) {
+                        if(_(args).isArray()){
+                            _(args).each( function( subargs ) {
+                                var _prems = runCommand(path,{'command': command, 'args': [subargs]});
+                                _prems
+                                    .done(outputReport('success'))
+                                    .fail(outputReport('fail'))
+                                ;
+                                _promises.push(_prems);
+                            })
+                        } else {
+                            var _prems = runCommand(path,{'command': command, 'args': [args]});
+                            _prems.done(outputReport('success'));
+                            _prems.fail(outputReport('fail'));
+                            _promises.push(_prems);
+                        }
                     });
-                }
-                else {
-                    runGruntTasks(path, tasks, options, next);
+
+                    // q.all(_promises)
+                    // .then()
+                    // .fail();
+                } else {
+                    if (options.npmInstall) {
+                        return runNpmInstall(path, options)
+                        .then(function(path, options){
+                            return runGruntTasks(path, options)
+                            .then(function(path, options){
+                                if(options.npmClean){
+                                    return runNpmClean(path, options);
+                                }
+                                return null;
+                            });
+                        });
+                    }
+                    else {
+                        runGruntTasks(path, tasks, options, next);
+                    }
                 }
             });
         }, cb);

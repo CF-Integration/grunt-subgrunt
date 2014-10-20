@@ -1,0 +1,33 @@
+{
+  "name": "dummy",
+  "version": "0.0.1",
+  "description": "Dummy project for testing.",
+  "repository": {},
+  "author": {
+    "name": "Bertrand Marron",
+    "email": "b@pk.am",
+    "url": "http://pk.am"
+  },
+  "contributors": {
+    "name": "Jean-cédric Thérond",
+    "email": "jean-cedric.therond@cellfishmedia.fr",
+    "url": "kane-thornwyrd.github.io"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tusbar/grunt-subgrunt/issues"
+  },
+  "peerDependencies": {
+    "grunt": "~0.4.4"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=0.8.0"
+  },
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-jshint": "^0.10.0",
+    "grunt-contrib-watch": "^0.6.1",
+    "matchdep": "^0.3.0"
+  }
+}
