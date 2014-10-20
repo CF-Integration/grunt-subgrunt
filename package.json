@@ -7,7 +7,7 @@
     "url": "git://github.com/tusbar/grunt-subgrunt.git"
   },
   "scripts": {
-    "test": "grunt jshint"
+    "test": "grunt test"
   },
   "keywords": [
     "gruntplugin",
