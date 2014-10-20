@@ -35,7 +35,7 @@ module.exports = function (grunt) {
             'npm': 'up'
           },
           postCommands: {
-            // 'svn': ['ci', '-m', '"Test Subgrunt"']
+            'svn': ['ci', '-m', '"okok"']
           }
         },
         projects: {

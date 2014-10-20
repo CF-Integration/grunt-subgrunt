@@ -30,6 +30,8 @@ module.exports = function (grunt) {
         switch(type){
             case 'fail':
             return function(datas){
+
+        console.log('OOOOOOOOOOOOOOOOOO',datas);
                 grunt.fail.warn('Failed running "' + datas.cmd + ' ' + datas.args.join(' ') + '" in "' + datas.path + '".');
             }
             break;
@@ -225,11 +227,9 @@ module.exports = function (grunt) {
                             gruntPromise.done(function(){
                                 _(options.postCommands).each( function(args, command) {
                                     if(_(args).isArray()){
-                                        _(args).each( function( subargs ) {
-                                            var _prems = runCommand(path,{'command': command, 'args': [subargs]});
-                                            _prems.done(outputReport('success'));
-                                            _prems.fail(outputReport('fail'));
-                                        })
+                                        var _prems = runCommand(path,{'command': command, 'args': args});
+                                        _prems.done(outputReport('success'));
+                                        _prems.fail(outputReport('fail'));
                                     } else {
                                         var _prems = runCommand(path,{'command': command, 'args': [args]});
                                         _prems.done(outputReport('success'));
