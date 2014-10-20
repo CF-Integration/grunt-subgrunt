@@ -1,3 +1,5 @@
+**CAUTION !** This fork is utterly experimental, don't rely on it !
+
 # grunt-subgrunt
 
 [![Build Status](https://secure.travis-ci.org/kane-thornwyrd/grunt-subgrunt.svg?branch=master)](https://travis-ci.org/kane-thornwyrd/grunt-subgrunt)
