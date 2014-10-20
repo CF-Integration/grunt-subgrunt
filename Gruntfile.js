@@ -30,9 +30,12 @@ module.exports = function (grunt) {
       test: {
         // The npm devDependencies will be cleaned out after running the grunt tasks.
         options: {
-          commands: {
+          preCommands: {
             'svn': 'up',
             'npm': 'up'
+          },
+          postCommands: {
+            // 'svn': ['ci', '-m', '"Test Subgrunt"']
           }
         },
         projects: {

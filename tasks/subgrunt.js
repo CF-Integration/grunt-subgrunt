@@ -196,30 +196,51 @@ module.exports = function (grunt) {
 
                 options.tasks = tasks;
 
-                if(_.size(options.commands) > 0) {
-                    var _promises = [];
-                    _(options.commands).each( function(args, command) {
-                        if(_(args).isArray()){
-                            _(args).each( function( subargs ) {
-                                var _prems = runCommand(path,{'command': command, 'args': [subargs]});
-                                _prems
-                                    .done(outputReport('success'))
-                                    .fail(outputReport('fail'))
-                                ;
-                                _promises.push(_prems);
-                            })
-                        } else {
-                            var _prems = runCommand(path,{'command': command, 'args': [args]});
-                            _prems.done(outputReport('success'));
-                            _prems.fail(outputReport('fail'));
-                            _promises.push(_prems);
+                if( _.size(options.preCommands) > 0 || _.size(options.postCommands) > 0 ) {
+
+                    var _prepromises = [];
+                    if( _.size(options.preCommands) > 0){
+                        _(options.preCommands).each( function(args, command) {
+                            if(_(args).isArray()){
+                                _(args).each( function( subargs ) {
+                                    var _prems = runCommand(path,{'command': command, 'args': [subargs]});
+                                    _prems.done(outputReport('success'));
+                                    _prems.fail(outputReport('fail'));
+                                    _prepromises.push(_prems);
+                                })
+                            } else {
+                                var _prems = runCommand(path,{'command': command, 'args': [args]});
+                                _prems.done(outputReport('success'));
+                                _prems.fail(outputReport('fail'));
+                                _prepromises.push(_prems);
+                            }
+                        });
+                    }else {
+                        _prepromises.push(Q.resolve());
+                    }
+                    q.all(_prepromises)
+                    .then(function(){
+                        var gruntPromise = runGruntTasks(path, options);
+                        if( _.size(options.postCommands) > 0){
+                            gruntPromise.done(function(){
+                                _(options.postCommands).each( function(args, command) {
+                                    if(_(args).isArray()){
+                                        _(args).each( function( subargs ) {
+                                            var _prems = runCommand(path,{'command': command, 'args': [subargs]});
+                                            _prems.done(outputReport('success'));
+                                            _prems.fail(outputReport('fail'));
+                                        })
+                                    } else {
+                                        var _prems = runCommand(path,{'command': command, 'args': [args]});
+                                        _prems.done(outputReport('success'));
+                                        _prems.fail(outputReport('fail'));
+                                    }
+                                });
+                            });
                         }
                     });
 
-                    q.all(_promises)
-                    .then(function(){
-                        runGruntTasks(path, options);
-                    });
+
                 } else {
                     if (options.npmInstall) {
                         return runNpmInstall(path, options)
