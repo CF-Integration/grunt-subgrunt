@@ -31,12 +31,12 @@ module.exports = function (grunt) {
         // The npm devDependencies will be cleaned out after running the grunt tasks.
         options: {
           commands: {
-            'svn': 'up',
-            'npm': 'up'
+            // 'svn': 'up',
+            // 'npm': 'up'
           }
         },
         projects: {
-          './tests': ['echo']
+          './tests': ['test']
         }
       },
     }

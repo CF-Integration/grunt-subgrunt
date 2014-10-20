@@ -3,7 +3,9 @@
 module.exports = function (grunt) {
 
   grunt.initConfig({
-
+    echo: {
+      ok: {}
+    }
   });
 
   require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);

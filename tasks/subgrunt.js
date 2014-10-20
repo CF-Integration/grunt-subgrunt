@@ -136,16 +136,14 @@ module.exports = function (grunt) {
     };
 
     var runGruntTasks = function (path, options) {
-        console.log('RUNGRUNTTASKS', path, options);
         var deferred = q.defer();
         var args = options.passGruntFlags ? grunt.option.flags().concat(options.tasks) : options.tasks;
-
         grunt.util.spawn({
             grunt: true,
             args: args,
             opts: { cwd: path, stdio: 'inherit' }
         }, function (err, result, code) {
-            return determineSuccess('grunt ' + args.join(' '))({
+            return determineSuccess('grunt', args)({
                 'err' : err,
                 'result' : result,
                 'code' : code,
@@ -218,9 +216,10 @@ module.exports = function (grunt) {
                         }
                     });
 
-                    // q.all(_promises)
-                    // .then()
-                    // .fail();
+                    q.all(_promises)
+                    .then(function(){
+                        runGruntTasks(path, options);
+                    });
                 } else {
                     if (options.npmInstall) {
                         return runNpmInstall(path, options)
@@ -235,7 +234,7 @@ module.exports = function (grunt) {
                         });
                     }
                     else {
-                        runGruntTasks(path, tasks, options, next);
+                        return runGruntTasks(path, options);
                     }
                 }
             });
